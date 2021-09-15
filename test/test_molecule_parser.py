@@ -3,7 +3,7 @@ from molecule_parser import MoleculeParser
 
 class MoleculeParserTest(unittest.TestCase):
 
-    def test_parse_molecule(self):
+    def test_parse_molecule_with_empty_formula(self):
         moleculeParser = MoleculeParser()
         result = moleculeParser.parse_molecule("")
         expected_result = {}
