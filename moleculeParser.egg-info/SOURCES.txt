@@ -1,7 +1,0 @@
-README.md
-setup.py
-moleculeParser.egg-info/PKG-INFO
-moleculeParser.egg-info/SOURCES.txt
-moleculeParser.egg-info/dependency_links.txt
-moleculeParser.egg-info/top_level.txt
-test/test_molecule_parser.py

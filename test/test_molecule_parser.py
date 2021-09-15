@@ -1,4 +1,5 @@
 import unittest
+from molecule_parser import MoleculeParser
 
 class MoleculeParserTest(unittest.TestCase):
 
