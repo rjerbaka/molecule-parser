@@ -4,6 +4,6 @@ from setuptools import find_packages
 
 setup(
     name="molecule-parser",
-    version="1.1",
+    version="1.0",
     description="Parses molecules and retrieves their atom composition."
 )

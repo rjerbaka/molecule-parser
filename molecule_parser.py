@@ -1,35 +1,101 @@
 from re import findall as find_all_regex_matches
+from re import compile as compile_regex
+from collections import Counter
 
 class MoleculeParser:
-    
-    
-    SUB_MOLECULE_REGEX = r"([([{])([a-zA-Z]*)([\])}])(\d*)"
-
-    #enclosures = {"{": "}", "[": "]", "(": ")"}
-
-    #atomRegex = compile_regex(ATOM_REGEX)
-    #subMoleculeRegex = compile_regex(SUB_MOLECULE_REGEX)
     
 
     def parse_molecule(moleculeFormula):
         """
-
+        Takes a molecule chemical formula and returns a dictionary with the atoms it contains and their count. 
         """
 
-        moleculeComposition = {}
+        submoleculeComposition = MoleculeParser.parse_submolecules(moleculeFormula)
+        moleculeFormulaWithoutSubmolecules = MoleculeParser.remove_submolecules_from_formula(moleculeFormula)
+        restOfMoleculeComposition =  MoleculeParser.parse_simple_molecule(moleculeFormulaWithoutSubmolecules, 1)
+        moleculeComposition = dict(Counter(submoleculeComposition) + Counter(restOfMoleculeComposition))
 
-        moleculeComposition =  MoleculeParser.parse_simple_molecule(moleculeFormula, 1)
+        return moleculeComposition
+
+
+    def parse_submolecules(moleculeFormula):
+        """
+        Takes a molecule formula and returns the combined atom composition of all its submolecules. 
+        """
+
+        submolecules = MoleculeParser.extract_submolecules(moleculeFormula)
+        extractedSubmoleculeComposition = MoleculeParser.sum_submolecule_compositions(submolecules)
+
+        return extractedSubmoleculeComposition
+
+
+    def extract_submolecules(moleculeFormula):
+        """
+        Takes a molecule formula and returns a dictionary of all first-level submolecules and their count. 
+        First-level submolecules correspond to top level brackets, for example in K4[ON(SO3)2]2, 
+        ON(SO3)2 is the only first level submolecule.
+        """
+
+        SUBMOLECULE_REGULAR_EXPRESSION = r"[([{]([A-Za-z([{)\]}\d]*)[)\]}](\d*)"
+        matchedSubmolecules = find_all_regex_matches(SUBMOLECULE_REGULAR_EXPRESSION, moleculeFormula)
+
+        submolecules = {}
+
+        for submolecule in matchedSubmolecules:
+            submoleculeFormula = submolecule[0]
+            submoleculeFactor = MoleculeParser.get_factor_from_regex_match(submolecule[1])
+            submolecules[submoleculeFormula] = submoleculeFactor
+
+        return submolecules
+
+
+    def remove_submolecules_from_formula(moleculeFormula):
+        """
+        Removes submolecules, their brackets and their indexes from a given formula. 
+        """
+
+        SUBMOLECULE_REGULAR_EXPRESSION_WITHOUT_TUPLES = r"[([{][A-Za-z([{)\]}\d]*[)\]}]\d*"
+        matchedSubmolecules = find_all_regex_matches(SUBMOLECULE_REGULAR_EXPRESSION_WITHOUT_TUPLES, moleculeFormula)
+
+        for submoleculeFormula in matchedSubmolecules:
+            moleculeFormula = moleculeFormula.replace(submoleculeFormula, "")
+
+        return moleculeFormula
+
+
+    def sum_submolecule_compositions(submolecules):
+        """
+        Takes a list of submolecules and their indexes, returns the combined atom composition of these submolecules.
+        """
+
+        finalComposition = {}
+
+        for submoleculeFormula in submolecules:
+            submoleculeComposition = MoleculeParser.parse_molecule(submoleculeFormula)
+            submoleculeFactor = submolecules[submoleculeFormula]
+            submoleculeComposition = MoleculeParser.multiply_molecule_composition_by_factor(submoleculeComposition, submoleculeFactor)
+            finalComposition = dict(Counter(finalComposition)+Counter(submoleculeComposition))
+
+        return finalComposition
+
+        
+    def multiply_molecule_composition_by_factor(moleculeComposition, factor):
+        """
+        Multiplies the count of each atom in the input dictionary by the given factor.
+        """
+        moleculeComposition.update((atom, atomNumber * factor) for atom, atomNumber in moleculeComposition.items())
 
         return moleculeComposition
 
 
     def parse_simple_molecule(moleculeFormula, moleculeFactor):
         """
-
+        Takes a simple molecule formula (with no submolecules) and a factor, extracts each atom then 
+        calulates its atom composition. 
         """
 
-        ATOM_REGEX = r"([A-Z][a-z]{0,2})(\d*)"
-        atomList = find_all_regex_matches(ATOM_REGEX, moleculeFormula)
+        ATOM_REGULAR_EXPRESSION = r"([A-Z][a-z]{0,2})(\d*)"
+        atomList = find_all_regex_matches(ATOM_REGULAR_EXPRESSION, moleculeFormula)
         moleculeComposition = MoleculeParser.get_molecule_composition_from_matched_atom_list(atomList, moleculeFactor)
         
         return moleculeComposition
@@ -37,7 +103,8 @@ class MoleculeParser:
 
     def get_molecule_composition_from_matched_atom_list(regexMatchedAtomList, moleculeFactor):
         """
-
+        Takes a list of (atom, index) tuples and returns a dictionary with the final counts multiplied with the 
+        general molecule factor.
         """
 
         moleculeComposition = {}
@@ -50,28 +117,28 @@ class MoleculeParser:
         return moleculeComposition
 
 
-
     def calculate_atom_factor_in_molecule(matchedFactor, moleculeFactor):
         """
-
+        From a text atom index and an int molecule factor, returns the final count for the given atom.
         """
 
-        atomFactor = MoleculeParser.get_atom_factor_from_regex_match(matchedFactor)
+        atomFactor = MoleculeParser.get_factor_from_regex_match(matchedFactor)
 
         return atomFactor * moleculeFactor
 
 
-    def get_atom_factor_from_regex_match(matchedFactor):
+    def get_factor_from_regex_match(matchedFactor):
+        """
+        Returns the found count for a given atom. If the matched factor is an empty string, then there's only one occurrency of the given atom. 
+        Thus, the method returns 1.
         """
 
-        """
-
-        matchedAtomFactor = 1
-        matchedAtomHasAFactor = len(matchedFactor) > 0
+        factor = 1
+        matchedItemHasAFactor = len(matchedFactor) > 0
         
-        if matchedAtomHasAFactor :
-            matchedAtomFactor = int(matchedFactor)
+        if matchedItemHasAFactor :
+            factor = int(matchedFactor)
 
-        return matchedAtomFactor
+        return factor
 
         
