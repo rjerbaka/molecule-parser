@@ -1,5 +1,4 @@
 from re import findall as find_all_regex_matches
-from re import compile as compile_regex
 from collections import Counter
 
 class MoleculeParser:
