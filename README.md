@@ -1,7 +1,7 @@
 Molecule Parser
 ======
 
-A molecule chemical formula parser developed for a Back Market technical test.
+A molecule chemical formula parser developed for the Back Market technical test.
 
 ## Install
 
@@ -15,6 +15,7 @@ make install
 source env/bin/activate
 ```
 This project requires virtualenv to activate the local environment.
+
 
 ## Run unit tests
 

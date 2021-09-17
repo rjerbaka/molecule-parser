@@ -34,6 +34,9 @@ class MoleculeParser:
         Takes a molecule formula and returns a dictionary of all first-level submolecules and their count. 
         First-level submolecules correspond to top level brackets, for example in K4[ON(SO3)2]2, 
         ON(SO3)2 is the only first level submolecule.
+
+        The chosen regular expression tolerates mistakes in terms of bracket types. For instance, the
+        molecule parser will be able to parse the following formula: Mg(OH]2.
         """
 
         SUBMOLECULE_REGULAR_EXPRESSION = r"[([{]([A-Za-z([{)\]}\d]*)[)\]}](\d*)"
@@ -92,6 +95,9 @@ class MoleculeParser:
         """
         Takes a simple molecule formula (with no submolecules) and a factor, extracts each atom then 
         calulates its atom composition. 
+
+        The chosen regular expression assumes that an element symbol can't have more than 3 letters with at least
+        one in caps.
         """
 
         ATOM_REGULAR_EXPRESSION = r"([A-Z][a-z]{0,2})(\d*)"
