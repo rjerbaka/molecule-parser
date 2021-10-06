@@ -1,7 +1,7 @@
 Molecule Parser
 ======
 
-A molecule chemical formula parser developed for the Back Market technical test.
+A molecule chemical formula parser developed for a technical test.
 
 ## Install
 
